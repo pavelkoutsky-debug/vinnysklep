@@ -42,7 +42,7 @@ export interface GeminiWineData {
   price_eur: number | null
   food_pairing_cs: string[] | null
   data_confidence: 'high' | 'medium' | 'low'
-  image_url: string | null
+  image_search_hint: string | null
 }
 
 export async function lookupWineWithGemini(
@@ -76,7 +76,7 @@ export async function lookupWineWithGemini(
       price_eur: (v?.price_eur as number) ?? null,
       food_pairing_cs: (w.food_pairing_cs as string[]) ?? null,
       data_confidence: (w.gemini_confidence as 'high' | 'medium' | 'low') ?? 'low',
-      image_url: (w.image_url as string) ?? null,
+      image_search_hint: null,
     }
   } catch (err) {
     console.error('Gemini wine lookup failed:', err)

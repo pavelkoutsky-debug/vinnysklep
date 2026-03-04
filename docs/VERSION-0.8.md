@@ -352,7 +352,7 @@ Sdílení sklepa přes token. **Backlog – není implementováno v UI.**
 
 ## 4. Edge Functions (Supabase)
 
-### 4.1 `gemini-wine-info` (~370 řádků)
+### 4.1 `gemini-wine-info` (309 řádků)
 
 **Runtime**: Deno v2
 **URL**: `https://fupzdgtncwmrdglmrwue.supabase.co/functions/v1/gemini-wine-info`
@@ -380,30 +380,13 @@ Sdílení sklepa přes token. **Backlog – není implementováno v UI.**
 1. Zkontroluj DB cache (cache_expires_at > now)
    → Ano: vrať cached data
    → Ne: pokračuj
-2. Zavolej Gemini s Google Search (strukturovaný prompt, včetně image_url)
+2. Zavolej Gemini s Google Search (strukturovaný prompt)
 3. Parsuj JSON odpověď
 4. Ulož do DB:
    a. wines: SELECT → UPDATE (existující) nebo INSERT (nový)
-   b. Fetch & store image: stáhni fotku lahve → upload do Storage → update wines.image_url
-   c. vintages: UPSERT (onConflict: wine_id,year)
+   b. vintages: UPSERT (onConflict: wine_id,year)
 5. Vrať { data: {...wine, vintage: vintageRow}, cached: false }
 ```
-
-#### Image fetching (`fetchAndStoreWineImage`)
-- Stáhne obrázek z URL nalezeného Gemini (8s timeout)
-- Validuje content-type (JPEG/PNG/WebP) a velikost (1KB–2MB)
-- Uploadne do Supabase Storage bucket `wine-images` jako `{wine_id}.{ext}`
-- Vrátí public URL; při jakékoliv chybě vrátí null (fail-safe)
-- Obrázek se stáhne jen pokud víno ještě nemá image_url
-
-#### Supabase Storage
-
-| Bucket | Viditelnost | Limit | MIME types | RLS |
-|--------|-------------|-------|------------|-----|
-| `wine-images` | public | 2 MiB | JPEG, PNG, WebP | read: public, write: service_role |
-
-**Migrace**: `004_wine_images_storage.sql`
-**Naming**: `{wine_id}.{ext}` (upsert – jedno foto na víno)
 
 ### 4.2 `exchange-rates` (83 řádků)
 

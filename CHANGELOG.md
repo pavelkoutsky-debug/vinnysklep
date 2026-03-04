@@ -5,33 +5,6 @@ Formát: [Semantic Versioning](https://semver.org/) – MAJOR.MINOR.PATCH
 
 ---
 
-## [0.9.0] – 2026-03-04
-
-### Přidáno
-- **Automatické fotky lahví**: Při vyhledávání vína přes Gemini AI se automaticky stáhne fotka lahve
-  - Gemini s Google Search grounding najde URL fotky (preferuje konkrétní ročník, fallback na jiný ročník)
-  - Edge Function stáhne obrázek server-side a uloží do Supabase Storage (bucket `wine-images`)
-  - Fotka se zobrazí v search result (AddWinePage), grid/list view (CellarPage), detail (WineDetailPage)
-  - Fail-safe: při jakékoliv chybě stahování se víno uloží bez fotky (Wine ikona jako fallback)
-- **Supabase Storage bucket** `wine-images`: public read, service_role write, 2MB limit, JPEG/PNG/WebP
-
-### Změněno
-- `GeminiWineData.image_search_hint` přejmenováno na `image_url`
-- Gemini prompt rozšířen o požadavek na `image_url` – přímý odkaz na fotografii lahve
-- CellarPage WineListRow nyní zobrazuje fotku lahve (dříve jen Wine ikona)
-
-### Soubory
-- `supabase/migrations/004_wine_images_storage.sql` – NOVÝ: Storage bucket + RLS policies
-- `supabase/functions/gemini-wine-info/index.ts` – nová funkce `fetchAndStoreWineImage()`, rozšířený prompt, integrace do `handleWineInfo`
-- `src/lib/gemini.ts` – `image_search_hint` → `image_url` v interface + mapping
-- `src/pages/AddWinePage.tsx` – náhled fotky v search result
-- `src/pages/CellarPage.tsx` – image v WineListRow + rozšířený type cast
-
-### Migrace
-- `004_wine_images_storage.sql` – Storage bucket `wine-images` + RLS policies
-
----
-
 ## [0.8.0] – 2026-03-04
 
 ### Základ (initial release)

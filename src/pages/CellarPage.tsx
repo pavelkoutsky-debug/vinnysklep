@@ -228,18 +228,14 @@ function WineCard({ item, currency }: { item: CellarItem; currency: string }) {
 }
 
 function WineListRow({ item, currency }: { item: CellarItem; currency: string }) {
-  const wine = (item.vintage as { wine?: { name?: string; color?: string; country_cs?: string; winery?: string; image_url?: string } } | undefined)?.wine
+  const wine = (item.vintage as { wine?: { name?: string; color?: string; country_cs?: string; winery?: string } } | undefined)?.wine
   const vintage = item.vintage as { year?: number; drink_from?: number; drink_until?: number; peak_start?: number; peak_end?: number } | undefined
   const status = vintage ? computeMaturityStatus(vintage as never) : 'can_drink'
 
   return (
     <Link to={`/cellar/${item.id}`} className="flex items-center gap-4 rounded-lg border p-3 hover:bg-accent transition-colors">
-      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-wine-50 overflow-hidden">
-        {wine?.image_url ? (
-          <img src={wine.image_url} alt="" className="h-full w-full object-contain" />
-        ) : (
-          <Wine className="h-5 w-5 text-wine-600" />
-        )}
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-wine-50">
+        <Wine className="h-5 w-5 text-wine-600" />
       </div>
       <div className="flex-1 min-w-0">
         <p className="truncate font-medium">{wine?.name}</p>

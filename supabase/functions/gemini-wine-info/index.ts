@@ -63,67 +63,6 @@ async function callGemini(prompt: string, withSearch = false) {
   throw new Error(`Gemini API error: ${lastError}`)
 }
 
-// ─── Image fetch & store helper ──────────────────────────────────────────────
-async function fetchAndStoreWineImage(
-  imageUrl: string,
-  wineId: string,
-  supabase: ReturnType<typeof createClient>,
-): Promise<string | null> {
-  try {
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 8000)
-
-    const imageRes = await fetch(imageUrl, {
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; VinnySklep/1.0)',
-        'Accept': 'image/jpeg,image/png,image/webp,image/*',
-      },
-    })
-    clearTimeout(timeout)
-
-    if (!imageRes.ok) return null
-
-    const contentType = imageRes.headers.get('content-type') ?? ''
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp']
-    const matchedType = validTypes.find(t => contentType.includes(t))
-    if (!matchedType) return null
-
-    const arrayBuffer = await imageRes.arrayBuffer()
-    if (arrayBuffer.byteLength > 2 * 1024 * 1024) return null  // >2MB
-    if (arrayBuffer.byteLength < 1000) return null              // <1KB (error page)
-
-    const extMap: Record<string, string> = {
-      'image/jpeg': 'jpg',
-      'image/png': 'png',
-      'image/webp': 'webp',
-    }
-    const ext = extMap[matchedType] ?? 'jpg'
-    const filePath = `${wineId}.${ext}`
-
-    const { error: uploadError } = await supabase.storage
-      .from('wine-images')
-      .upload(filePath, arrayBuffer, {
-        contentType: matchedType,
-        upsert: true,
-      })
-
-    if (uploadError) {
-      console.error('Storage upload error:', uploadError.message)
-      return null
-    }
-
-    const { data: urlData } = supabase.storage
-      .from('wine-images')
-      .getPublicUrl(filePath)
-
-    return urlData.publicUrl
-  } catch (err) {
-    console.error('Image fetch/store error:', err instanceof Error ? err.message : String(err))
-    return null
-  }
-}
-
 function extractJson(rawText: string): string {
   // Strip markdown code fences if present
   const stripped = rawText.replace(/^```(?:json)?\n?/m, '').replace(/\n?```$/m, '').trim()
@@ -217,8 +156,7 @@ Vrať POUZE validní JSON bez markdown:
   },
   "winery_history_cs": "2-3 věty o historii vinařství česky nebo null",
   "expert_rating_avg": číslo 0-100 nebo null,
-  "expert_rating_text": "Decanter: 95, WS: 93, WA: 96 nebo null",
-  "image_url": "přímý URL odkaz na fotografii lahve tohoto vína (Vivino, Wine.com, e-shop, web vinařství). Preferuj obrázek konkrétního ${vintageHint}. URL musí být přímý odkaz na obrázek (ne HTML stránku). Pokud nenajdeš, vrať null."
+  "expert_rating_text": "Decanter: 95, WS: 93, WA: 96 nebo null"
 }`
 
   const rawText = await callGemini(prompt, true)
@@ -268,16 +206,6 @@ Vrať POUZE validní JSON bez markdown:
       .from('wines').insert(winePayload).select().single()
     if (insertErr) throw insertErr
     wine = inserted
-  }
-
-  // Fetch and store wine image (fail-safe – nikdy neblokuje hlavní flow)
-  const geminiImageUrl = typeof wineData.image_url === 'string' ? wineData.image_url : null
-  if (geminiImageUrl && !wine.image_url) {
-    const storedImageUrl = await fetchAndStoreWineImage(geminiImageUrl, wine.id as string, supabase)
-    if (storedImageUrl) {
-      await supabase.from('wines').update({ image_url: storedImageUrl }).eq('id', wine.id)
-      wine.image_url = storedImageUrl
-    }
   }
 
   const { data: vintageRow, error: vintageError } = await supabase

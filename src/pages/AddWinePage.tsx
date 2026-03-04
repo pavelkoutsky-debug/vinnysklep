@@ -272,16 +272,6 @@ export default function AddWinePage() {
             <div className="rounded-lg border border-green-200 bg-green-50 p-4">
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600" />
-                {foundWine.data.image_url && (
-                  <div className="w-16 h-24 rounded bg-white border overflow-hidden flex-shrink-0">
-                    <img
-                      src={foundWine.data.image_url}
-                      alt={foundWine.name}
-                      className="w-full h-full object-contain"
-                      onError={(e) => { (e.target as HTMLImageElement).parentElement!.style.display = 'none' }}
-                    />
-                  </div>
-                )}
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold">{foundWine.name} {foundWine.vintage === 0 ? 'NV' : foundWine.vintage}</p>
                   <p className="text-sm text-muted-foreground">
