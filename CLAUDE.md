@@ -118,6 +118,28 @@ npm run wine-test   # 97-wine quality test (Gemini)
 npm run qa          # Plný QA + PM report
 ```
 
-## Dokumentace
-- `docs/VERSION-0.8.md` – kompletní technická dokumentace (architektura, DB, API, soubory)
-- `docs/SPEC-0.8.md` – funkční specifikace (user stories, funkce per stránka)
+## Verzování a dokumentace
+
+### POVINNÝ workflow při každé změně
+1. **Implementuj změnu** (kód, DB migrace, Edge Functions...)
+2. **Aktualizuj `CHANGELOG.md`** – přidej záznam s popisem změn, dotčenými soubory
+3. **Aktualizuj `docs/VERSION-0.8.md`** (nebo novější) – pokud se mění architektura, DB, API, soubory
+4. **Aktualizuj `docs/SPEC-0.8.md`** (nebo novější) – pokud se mění funkční chování
+5. **Aktualizuj tuto sekci CLAUDE.md** – pokud se mění konvence, klíčové soubory, gotchas
+6. **Commitni** s verzovaným tagem (minor: nová funkce, patch: bugfix)
+7. **Git tag** pro milníky: `v0.8.1`, `v0.9.0`, atd.
+
+### Verzování
+- **MAJOR** (1.0, 2.0): breaking changes, kompletní přepis
+- **MINOR** (0.9, 0.10): nová funkce, nová stránka, nový Edge Function endpoint
+- **PATCH** (0.8.1, 0.8.2): bugfix, oprava, drobná úprava UI
+
+### Soubory dokumentace
+- `CHANGELOG.md` – chronologický přehled všech změn (primární zdroj pravdy)
+- `docs/VERSION-0.8.md` – technická dokumentace v0.8 (architektura, DB, API, soubory)
+- `docs/SPEC-0.8.md` – funkční specifikace v0.8 (user stories, funkce per stránka)
+
+### Git tagy
+- `v0.8` – stabilní záloha (baseline)
+- Pro návrat: `git checkout v0.8`
+- Pro porovnání: `git diff v0.8..HEAD`

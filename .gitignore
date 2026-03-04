@@ -38,3 +38,14 @@ Thumbs.db
 
 # Testing
 coverage/
+test-results/
+
+# Reports (generated)
+pm-report.md
+wine-test-report.md
+
+# Claude Code
+.claude/
+
+# Firebase Studio
+.idx/
