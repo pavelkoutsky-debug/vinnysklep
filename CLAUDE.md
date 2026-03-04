@@ -118,6 +118,11 @@ npm run wine-test   # 97-wine quality test (Gemini)
 npm run qa          # Plný QA + PM report
 ```
 
+## GitHub repository
+- **Repo**: `https://github.com/pavelkoutsky-debug/vinnysklep`
+- **Branch**: `main` (jediný branch, veškerý vývoj)
+- **Viditelnost**: private
+
 ## Verzování a dokumentace
 
 ### POVINNÝ workflow při každé změně
@@ -128,6 +133,7 @@ npm run qa          # Plný QA + PM report
 5. **Aktualizuj tuto sekci CLAUDE.md** – pokud se mění konvence, klíčové soubory, gotchas
 6. **Commitni** s verzovaným tagem (minor: nová funkce, patch: bugfix)
 7. **Git tag** pro milníky: `v0.8.1`, `v0.9.0`, atd.
+8. **Pushni na GitHub**: `git push origin main --tags`
 
 ### Verzování
 - **MAJOR** (1.0, 2.0): breaking changes, kompletní přepis
@@ -139,7 +145,16 @@ npm run qa          # Plný QA + PM report
 - `docs/VERSION-0.8.md` – technická dokumentace v0.8 (architektura, DB, API, soubory)
 - `docs/SPEC-0.8.md` – funkční specifikace v0.8 (user stories, funkce per stránka)
 
-### Git tagy
+### Git tagy a GitHub
 - `v0.8` – stabilní záloha (baseline)
 - Pro návrat: `git checkout v0.8`
 - Pro porovnání: `git diff v0.8..HEAD`
+- Pro zobrazení tagů na GitHub: repo → Releases / Tags
+- **Po každém commitu vždy pushni na GitHub**
+
+### Co NESMÍ být na GitHubu (.gitignore)
+- `.env.local` – Supabase URL, anon key, Gemini API key
+- `node_modules/`, `dist/` – build artefakty
+- `.claude/` – Claude Code interní soubory
+- `.idx/` – Firebase Studio konfigurace
+- `test-results/`, `pm-report.md`, `wine-test-report.md` – generované reporty

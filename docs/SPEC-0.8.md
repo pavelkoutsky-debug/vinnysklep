@@ -88,6 +88,7 @@ Admin je identifikován emailem `pavel.koutsky@gmail.com` (nastaveno v DB i fron
 3. Klik na "Vyhledat s Gemini AI"
 4. Gemini AI vyhledá víno přes Google Search grounding
 5. **Nalezeno**: zobrazí se nalezená data:
+   - **Fotka lahve** (pokud nalezena – preferovaně konkrétní ročník, fallback jiný ročník)
    - Vinařství, země, region, apelace
    - Barva, odrůdy, alkohol
    - Popis česky
@@ -105,9 +106,10 @@ Admin je identifikován emailem `pavel.koutsky@gmail.com` (nastaveno v DB i fron
 
 ### Uložení do DB
 1. Wine: lookup existujícího (ilike name) → update NEBO insert
-2. Vintage: upsert (wine_id + year)
-3. CellarItem: insert (user_id, vintage_id, quantity, price...)
-4. Movement: insert (type='add', reason='purchase')
+2. **Image**: stáhne fotku lahve z URL nalezeného Gemini → uloží do Supabase Storage → aktualizuje wines.image_url
+3. Vintage: upsert (wine_id + year)
+4. CellarItem: insert (user_id, vintage_id, quantity, price...)
+5. Movement: insert (type='add', reason='purchase')
 
 ---
 
@@ -317,9 +319,17 @@ Admin je identifikován emailem `pavel.koutsky@gmail.com` (nastaveno v DB i fron
 ### Vyhledání vína
 - **Vstup**: název vína + ročník (nebo NV)
 - **Model**: Gemini 2.5 Flash + Google Search grounding
-- **Výstup**: strukturovaný JSON se všemi údaji o víně
+- **Výstup**: strukturovaný JSON se všemi údaji o víně + URL fotky lahve
 - **Cache**: 30 dní v DB (cache_expires_at)
 - **Fallback**: gemini-2.5-flash-lite, pak bez grounding
+
+### Automatická fotka lahve
+- **Vstup**: Gemini vrátí `image_url` – přímý odkaz na fotku lahve
+- **Preference**: konkrétní ročník → jiný ročník téhož vína → null
+- **Zpracování**: Edge Function stáhne obrázek → validace (content-type, 1KB–2MB) → upload do Supabase Storage
+- **Uložení**: `wine-images/{wine_id}.{ext}`, public URL v `wines.image_url`
+- **Fail-safe**: při chybě stahování se víno uloží bez fotky
+- **Zobrazení**: AddWinePage (search result), CellarPage (grid + list), WineDetailPage (header)
 
 ### On-demand enrichment
 - **Vstup**: wineId + vintageId + metadata
